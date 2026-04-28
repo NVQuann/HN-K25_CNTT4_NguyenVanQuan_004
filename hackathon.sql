@@ -2,6 +2,7 @@ create database BuytDien;
 
 use BuytDien;
 
+-- bảng passengers
 create table passengers(
 	passengers_id VARCHAR(5) primary key,
     full_name varchar(100) not null,
@@ -11,6 +12,7 @@ create table passengers(
     join_date date not null
 );
 
+-- bảng routes
 create table routes(
 	route_id varchar(5) primary key,
     route_name varchar(100) not null,
@@ -20,6 +22,7 @@ create table routes(
     base_fare decimal(10,2) check(base_fare > 0)
 );
 
+-- bảng buses
 create table buses(
 	bus_id varchar(5) primary key,
     plate_number varchar(15) not null unique,
@@ -29,6 +32,7 @@ create table buses(
     foreign key (route_id) references routes(route_id)
 );
 
+-- bảng tickets
 create table tickets(
 	ticket_id int primary key auto_increment,
     passengers_id varchar(5) not null,
@@ -40,8 +44,10 @@ create table tickets(
     unique(passengers_id, bus_id)
 );
 
+-- Thêm cột gender
 alter table passengers add column gender varchar(10);
 
+-- chèn dữ liệu bảng passengers
 insert into passengers(passengers_id, full_name, phone, card_type, balance,join_date)
 values 
 ('P01', 'Nguyễn Văn Hùng', '0911222333', 'Student', 50000, '2025-01-01'),
@@ -49,18 +55,21 @@ values
 ('P03', 'Trần Hoàng Long', '0905444333', 'Normal', 20000, '2025-03-05'),
 ('P04', 'Phạm Thu Thảo', '0977111222', 'Student', 30000, '2025-04-15');
 
+-- chèn dữ liệu bảng routes
 insert into routes
 values 
 ('R01', 'Tuyến E01', 'Bến xe Mỹ Đình', 'Công viên Thống Nhất', 15.5, 7000),
 ('R02', 'Tuyến E02', 'Hào Nam', 'Khu đô thị Ocean Park', 22.0, 9000),
 ('R03', 'Tuyến E03', 'Sân bay Nội Bài', 'Cầu Giấy', 30.0, 15000);
 
+-- chèn dữ liệu bảng buses
 insert into buses
 values 
 ('B01', '29E-001.01', 'R01', 45, 85),
 ('B02', '29E-002.15', 'R02', 50, 40),
 ('B03', '29E-003.09', 'R01', 45, 15);
 
+-- chèn dữ liệu bảng tickets
 insert into tickets (ticket_id, passengers_id, bus_id, tap_time, `status`)
 values
 (1, 'P01', 'B01', '2025-11-10 07:15:00', 'Success'),
@@ -68,53 +77,67 @@ values
 (3, 'P03', 'B01', '2025-11-11 17:45:00', 'Failed'),
 (4, 'P01', 'B03', '2025-11-12 06:00:00', 'Success');
 
+-- 4.
 update routes
 set base_fare = base_fare * 1.1
 where route_id = 'R02';
 
+-- 5.
 update passengers
 set card_type = 'Premium'
 where passengers_id = 'P03';
 
+-- 6.
 delete from tickets
 where `status` = 'Failed';
 
+-- 7.
 alter table buses add constraint check_battery check(battery_level between 0 and 100);
 
+-- 8.
 alter table tickets alter column `status` set default 'Success';
 
+-- 10.
 select *
 from routes
 where distance > 20;
 
+-- 11.
 select full_name, phone 
 from passengers
 where card_type = 'Student';
 
+-- 12.
 select bus_id, plate_number, battery_level
 from buses
 order by battery_level desc;
 
+-- 13.
 select *
 from tickets
 order by tap_time desc
 limit 3;
 
+-- 14.
 select route_name, base_fare
 from routes
 limit 2 offset 1;
 
+-- 15.
 update routes
 set base_fare = base_fare * 0.5
 where start_point = 'Hào Nam';
 
+-- 16.
 update routes
 set start_point = upper(start_point),
 	end_point = upper(end_point);
 
+-- 17.
 delete from buses
 where battery_level = 0;
 
+-- 18.
 select t.ticket_id, p.full_name, b.plate_number, r.route_name
 from tickets t
 join passengers p on t.passengers_id = p.passengers_id
@@ -122,26 +145,31 @@ join buses b on t.bus_id = b.bus_id
 join routes r on b.route_id = r.route_id
 where t.status = 'Success';
 
+-- 19
 select routes.route_name, count(buses.bus_id) 'So_luong_xe'
 from routes
 left join buses on routes.route_id = buses.route_id
 group by routes.route_id, routes.route_name;
 
+-- 21.
 select passengers.full_name, count(tickets.ticket_id) 'So_luot'
 from tickets
 join passengers on tickets.passengers_id = passengers.passengers_id
 group by passengers.passengers_id, passengers.full_name
 having count(tickets.ticket_id) >= 2;
 
+-- 22
 select * 
 from routes
 where base_fare > (select avg(base_fare) from routes);
 
+-- 24
 select buses.bus_id, buses.plate_number, buses.battery_level, routes.route_id
 from buses
 join routes on buses.route_id = routes.route_id
 where buses.battery_level < 20;
 
+-- 20
 select p.full_name, sum(r.base_fare) 'Tong_tien'
 from tickets t
 join passengers p on t.passengers_id = p.passengers_id
